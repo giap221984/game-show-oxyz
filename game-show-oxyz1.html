@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Show: Thử Thách Không Gian Oxyz</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 0;
+            color: #ffcc00;
+        }
+        
+        .game-screen {
+            background-color: rgba(0,0,0,0.7);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            display: none;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        .question {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            min-height: 80px;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            background-color: #2c3e50;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option:hover {
+            background-color: #34495e;
+            transform: scale(1.03);
+        }
+        
+        .true-false-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .true-false-btn {
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .true-btn {
+            background-color: #27ae60;
+        }
+        
+        .false-btn {
+            background-color: #e74c3c;
+        }
+        
+        .true-false-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .input-answer {
+            margin: 20px 0;
+        }
+        
+        input[type="text"] {
+            padding: 12px;
+            width: 200px;
+            border-radius: 5px;
+            border: none;
+            font-size: 1.2rem;
+        }
+        
+        .submit-btn {
+            padding: 12px 25px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .timer {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #ffcc00;
+        }
+        
+        .score-display {
+            font-size: 1.3rem;
+            margin: 20px 0;
+        }
+        
+        .feedback {
+            font-size: 1.3rem;
+            min-height: 30px;
+            margin: 15px 0;
+        }
+        
+        .correct {
+            color: #2ecc71;
+        }
+        
+        .incorrect {
+            color: #e74c3c;
+        }
+        
+        .start-btn, .next-btn, .restart-btn {
+            padding: 15px 30px;
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px;
+        }
+        
+        .start-btn:hover, .next-btn:hover, .restart-btn:hover {
+            background-color: #8e44ad;
+            transform: scale(1.05);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            background-color: #34495e;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .progress {
+            height: 20px;
+            background-color: #3498db;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .leaderboard {
+            background-color: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .leaderboard h3 {
+            margin-top: 0;
+            color: #ffcc00;
+        }
+        
+        .leaderboard ol {
+            text-align: left;
+            padding-left: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Game Show Toán Học</h1>
+        <h2>Thử Thách Không Gian Oxyz</h2>
+        
+        <div id="intro-screen" class="game-screen active">
+            <h3>Luật chơi</h3>
+            <p>1. Trả lời các câu hỏi trắc nghiệm, đúng/sai hoặc điền đáp số</p>
+            <p>2. Mỗi câu trả lời đúng được 1 điểm</p>
+            <p>3. Thời gian suy nghĩ: 15 giây/câu</p>
+            <p>4. Phần thưởng ảo sẽ hiển thị dựa trên điểm số của bạn</p>
+            
+            <button class="start-btn" onclick="startGame()">Bắt đầu</button>
+        </div>
+        
+        <div id="trivia-screen" class="game-screen">
+            <div class="timer" id="timer">15</div>
+            <div class="question" id="question"></div>
+            <div class="options" id="options"></div>
+            <div class="true-false-options" id="true-false-options" style="display: none;">
+                <button class="true-false-btn true-btn" onclick="checkTrueFalse(true)">Đúng</button>
+                <button class="true-false-btn false-btn" onclick="checkTrueFalse(false)">Sai</button>
+            </div>
+            <div class="input-answer" id="input-answer" style="display: none;">
+                <input type="text" id="answer-input" placeholder="Nhập đáp án...">
+                <button class="submit-btn" onclick="checkInputAnswer()">Gửi</button>
+            </div>
+            <div class="feedback" id="feedback"></div>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <button class="next-btn" id="next-btn" style="display: none;" onclick="nextQuestion()">Câu tiếp theo</button>
+        </div>
+        
+        <div id="result-screen" class="game-screen">
+            <h3>Kết quả của bạn</h3>
+            <div class="score-display" id="final-score"></div>
+            <div id="prize-message"></div>
+            <div class="leaderboard">
+                <h3>Bảng xếp hạng</h3>
+                <ol id="leaderboard-list">
+                    <li>Người chơi 1 - 20 điểm</li>
+                    <li>Người chơi 2 - 18 điểm</li>
+                    <li>Người chơi 3 - 15 điểm</li>
+                </ol>
+            </div>
+            <button class="restart-btn" onclick="restartGame()">Chơi lại</button>
+        </div>
+        
+        <div class="score-display" id="current-score" style="display: none;">Điểm: 0</div>
+    </div>
+
+    <script>
+        // Dữ liệu câu hỏi
+        const questions = [
+            // Vòng 1: Trắc nghiệm
+            {
+                type: "multiple-choice",
+                question: "Trong không gian Oxyz, cho OM = 2i + 3j - k. Tọa độ điểm M là:",
+                options: ["(-2;3;1)", "(2;-3;-1)", "(2;3;-1)", "(2;3;1)"],
+                correctAnswer: 2,
+                explanation: "Tọa độ điểm M chính là các hệ số của i, j, k: (2;3;-1)"
+            },
+            {
+                type: "multiple-choice",
+                question: "Điểm nào thuộc trục Oy?",
+                options: ["M(0;5;0)", "N(4;0;0)", "P(0;0;6)", "Q(4;5;0)"],
+                correctAnswer: 0,
+                explanation: "Điểm thuộc trục Oy có x=0 và z=0"
+            },
+            {
+                type: "multiple-choice",
+                question: "Hình chiếu của A(1;2;3) lên mặt phẳng (Oxz) là:",
+                options: ["P(0;2;3)", "M(1;0;3)", "N(0;2;0)", "Q(1;2;0)"],
+                correctAnswer: 1,
+                explanation: "Hình chiếu lên (Oxz) thì y=0, giữ nguyên x và z"
+            },
+            {
+                type: "multiple-choice",
+                question: "Cho a = (2;2;1) và b = (x-1)i + (x²-3)j + yk. Nếu a = b, giá trị x - y là:",
+                options: ["0", "2", "1", "-1"],
+                correctAnswer: 2,
+                explanation: "Giải hệ phương trình: x-1=2, x²-3=2, y=1 ⇒ x=3, y=1 ⇒ x-y=2"
+            },
+            {
+                type: "multiple-choice",
+                question: "Điểm đối xứng của A(1;2;3) qua trục Oz là:",
+                options: ["(1;2;3)", "(-1;2;3)", "(0;0;3)", "(-1;-2;3)"],
+                correctAnswer: 3,
+                explanation: "Đối xứng qua Oz: đổi dấu x và y, giữ nguyên z"
+            },
+            
+            // Vòng 2: Đúng/Sai
+            {
+                type: "true-false",
+                question: "ON = 2i + k ⇒ Tọa độ N(2;1;0)",
+                correctAnswer: false,
+                explanation: "Sai! ON = 2i + k ⇒ N(2;0;1)"
+            },
+            {
+                type: "true-false",
+                question: "Hình chiếu của M(2;4;6) lên (Oxy) là N(2;4;0)",
+                correctAnswer: true,
+                explanation: "Đúng! Hình chiếu lên (Oxy) thì z=0"
+            },
+            {
+                type: "true-false",
+                question: "Trong hình hộp ABCD.A'B'C'D', nếu A(0;0;0) và D'(0;3;3) thì A'(0;0;3)",
+                correctAnswer: true,
+                explanation: "Đúng! Vì A' nằm trên trục Oz cùng độ cao với D'"
+            },
+            {
+                type: "true-false",
+                question: "OA = (1;2;3) ⇒ O(0;0;1)",
+                correctAnswer: false,
+                explanation: "Sai! O luôn là gốc tọa độ (0;0;0)"
+            },
+            {
+                type: "true-false",
+                question: "Tọa độ AC' trong hình hộp chữ nhật là (3;4;6) nếu AB=3, AD=4, AA'=6",
+                correctAnswer: true,
+                explanation: "Đúng! AC' = AB + AD + AA' = (3;4;6)"
+            },
+            
+            // Vòng 3: Điền đáp số
+            {
+                type: "input",
+                question: "Cho OA = 3i + 4j - 5k. Tính S = 100x + 1000y + 10z",
+                correctAnswer: "4250",
+                explanation: "A(3;4;-5) ⇒ S = 100×3 + 1000×4 + 10×(-5) = 4250"
+            },
+            {
+                type: "input",
+                question: "Cho hình hộp OABC.EFGH với OA=5, OC=8, OE=7. Tọa độ H(5,8,7). Tính P = 50x + 75y + 1000z",
+                correctAnswer: "7850",
+                explanation: "P = 50×5 + 75×8 + 1000×7 = 250 + 600 + 7000 = 7850"
+            },
+            {
+                type: "input",
+                question: "Điểm M thỏa AM = 2MB với A(4;2;1), B(-2;-1;4). Tính |OM|",
+                correctAnswer: "3",
+                explanation: "M(0;0;3) ⇒ |OM| = 3"
+            },
+            {
+                type: "input",
+                question: "Cho A(3;2;-1), B(-1;0;5). Tìm T = a + b + c khi |MA + MB| nhỏ nhất",
+                correctAnswer: "2",
+                explanation: "M(1;1;0) ⇒ T = 1 + 1 + 0 = 2"
+            },
+            {
+                type: "input",
+                question: "Trong hình hộp, trọng tâm G của tam giác A'B'C có AG = (2;2;-1). Tính S = a + b + c",
+                correctAnswer: "3",
+                explanation: "AG = (2;2;-1) ⇒ S = 2 + 2 + (-1) = 3"
+            }
+        ];
+
+        // Biến trạng thái game
+        let currentQuestion = 0;
+        let score = 0;
+        let timer;
+        let timeLeft = 15;
+        let gameStarted = false;
+
+        // DOM elements
+        const introScreen = document.getElementById('intro-screen');
+        const triviaScreen = document.getElementById('trivia-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const trueFalseOptions = document.getElementById('true-false-options');
+        const inputAnswer = document.getElementById('input-answer');
+        const feedbackElement = document.getElementById('feedback');
+        const timerElement = document.getElementById('timer');
+        const nextButton = document.getElementById('next-btn');
+        const currentScoreElement = document.getElementById('current-score');
+        const finalScoreElement = document.getElementById('final-score');
+        const prizeMessageElement = document.getElementById('prize-message');
+        const progressBar = document.getElementById('progress');
+
+        // Bắt đầu game
+        function startGame() {
+            gameStarted = true;
+            introScreen.classList.remove('active');
+            triviaScreen.classList.add('active');
+            currentScoreElement.style.display = 'block';
+            showQuestion();
+            startTimer();
+        }
+
+        // Hiển thị câu hỏi
+        function showQuestion() {
+            if (currentQuestion >= questions.length) {
+                endGame();
+                return;
+            }
+
+            const q = questions[currentQuestion];
+            questionElement.textContent = q.question;
+            feedbackElement.textContent = '';
+            feedbackElement.className = 'feedback';
+            nextButton.style.display = 'none';
+            timeLeft = 15;
+            timerElement.textContent = timeLeft;
+
+            // Cập nhật progress bar
+            progressBar.style.width = `${(currentQuestion / questions.length) * 100}%`;
+
+            // Hiển thị loại câu hỏi phù hợp
+            optionsElement.innerHTML = '';
+            optionsElement.style.display = 'none';
+            trueFalseOptions.style.display = 'none';
+            inputAnswer.style.display = 'none';
+
+            if (q.type === 'multiple-choice') {
+                optionsElement.style.display = 'grid';
+                q.options.forEach((option, index) => {
+                    const button = document.createElement('div');
+                    button.className = 'option';
+                    button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+                    button.onclick = () => checkAnswer(index);
+                    optionsElement.appendChild(button);
+                });
+            } else if (q.type === 'true-false') {
+                trueFalseOptions.style.display = 'flex';
+            } else if (q.type === 'input') {
+                inputAnswer.style.display = 'block';
+                document.getElementById('answer-input').value = '';
+            }
+        }
+
+        // Bộ đếm thời gian
+        function startTimer() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    feedbackElement.textContent = 'Hết giờ!';
+                    feedbackElement.className = 'feedback incorrect';
+                    nextButton.style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        // Kiểm tra câu trả lời trắc nghiệm
+        function checkAnswer(selectedIndex) {
+            clearInterval(timer);
+            const q = questions[currentQuestion];
+            
+            if (selectedIndex === q.correctAnswer) {
+                feedbackElement.textContent = 'Chính xác! ' + q.explanation;
+                feedbackElement.className = 'feedback correct';
+                score++;
+                currentScoreElement.textContent = `Điểm: ${score}`;
+            } else {
+                feedbackElement.textContent = `Sai rồi! Đáp án đúng là ${String.fromCharCode(65 + q.correctAnswer)}. ${q.explanation}`;
+                feedbackElement.className = 'feedback incorrect';
+            }
+            
+            nextButton.style.display = 'block';
+        }
+
+        // Kiểm tra câu trả lời đúng/sai
+        function checkTrueFalse(answer) {
+            clearInterval(timer);
+            const q = questions[currentQuestion];
+            
+            if (answer === q.correctAnswer) {
+                feedbackElement.textContent = 'Chính xác! ' + q.explanation;
+                feedbackElement.className = 'feedback correct';
+                score++;
+                currentScoreElement.textContent = `Điểm: ${score}`;
+            } else {
+                feedbackElement.textContent = 'Sai rồi! ' + q.explanation;
+                feedbackElement.className = 'feedback incorrect';
+            }
+            
+            nextButton.style.display = 'block';
+        }
+
+        // Kiểm tra câu trả lời nhập liệu
+        function checkInputAnswer() {
+            clearInterval(timer);
+            const userAnswer = document.getElementById('answer-input').value.trim();
+            const q = questions[currentQuestion];
+            
+            if (userAnswer === q.correctAnswer.toString()) {
+                feedbackElement.textContent = 'Chính xác! ' + q.explanation;
+                feedbackElement.className = 'feedback correct';
+                score++;
+                currentScoreElement.textContent = `Điểm: ${score}`;
+            } else {
+                feedbackElement.textContent = `Sai rồi! Đáp án đúng là ${q.correctAnswer}. ${q.explanation}`;
+                feedbackElement.className = 'feedback incorrect';
+            }
+            
+            nextButton.style.display = 'block';
+        }
+
+        // Chuyển sang câu hỏi tiếp theo
+        function nextQuestion() {
+            currentQuestion++;
+            showQuestion();
+            startTimer();
+        }
+
+        // Kết thúc game
+        function endGame() {
+            clearInterval(timer);
+            triviaScreen.classList.remove('active');
+            resultScreen.classList.add('active');
+            
+            finalScoreElement.textContent = `Bạn đạt được ${score} điểm trên tổng số ${questions.length} câu hỏi`;
+            
+            // Hiển thị phần thưởng
+            if (score >= 11) {
+                prizeMessageElement.innerHTML = '<h3>Giải nhất!</h3><p>1 triệu VNĐ + Sách Toán cao cấp</p>';
+            } else if (score >= 5) {
+                prizeMessageElement.innerHTML = '<h3>Giải khuyến khích!</h3><p>Sticker "Toán học siêu đẳng"</p>';
+            } else {
+                prizeMessageElement.innerHTML = '<p>Cố gắng hơn nữa nhé!</p>';
+            }
+        }
+
+        // Chơi lại
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            currentScoreElement.textContent = 'Điểm: 0';
+            resultScreen.classList.remove('active');
+            introScreen.classList.add('active');
+            gameStarted = false;
+            progressBar.style.width = '0%';
+        }
+    </script>
+</body>
+</html>
